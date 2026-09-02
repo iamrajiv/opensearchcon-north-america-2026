@@ -178,3 +178,9 @@
 .slidev-layout .slidev-code-dishonored {
   opacity: 0.45;
 }
+
+/* Audience view: no navigation bar on the projector. Keyboard shortcuts still work,
+   and the presenter view (.slidev-presenter) keeps its own controls. */
+#page-root nav {
+  display: none !important;
+}
