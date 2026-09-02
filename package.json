@@ -15,6 +15,7 @@
     "vue": "latest"
   },
   "devDependencies": {
+    "hono": "^4.13.5",
     "playwright-chromium": "latest"
   }
 }
