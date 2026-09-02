@@ -28,6 +28,8 @@ jobs:
           PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1" # export-only dependency, not needed to build
       - run: npm run build -- --base /${{ github.event.repository.name }}/
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true # creates the Pages site with the Actions source on first run
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
