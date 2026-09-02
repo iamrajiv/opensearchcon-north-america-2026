@@ -1,0 +1,5 @@
+2026/09/02 03:03:02 indexed=5000 rate=328 docs/s
+2026/09/02 03:03:14 indexed=10000 rate=369 docs/s
+2026/09/02 03:03:25 indexed=15000 rate=399 docs/s
+2026/09/02 03:03:36 indexed=20000 rate=411 docs/s
+2026/09/02 03:03:36 done: indexed=20000 in 48.653s (411 docs/s)

@@ -1,0 +1,31 @@
+# Single-node OpenSearch for the demo. Security is disabled so the ingestor
+# can talk plain HTTP to http://localhost:9200 with no credentials.
+# Start:  docker compose up -d      Stop and wipe: docker compose down -v
+services:
+  opensearch:
+    image: opensearchproject/opensearch:3.8.0
+    container_name: opensearch-ingestor-demo
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - bootstrap.memory_lock=true
+      - OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g
+      # Shrink the write queue to force 429 rejections and watch the retries:
+      #   WRITE_QUEUE_SIZE=2 docker compose up -d
+      - thread_pool.write.queue_size=${WRITE_QUEUE_SIZE:-10000}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+
+volumes:
+  opensearch-data:

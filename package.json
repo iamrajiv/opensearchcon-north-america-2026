@@ -1,0 +1,20 @@
+{
+  "name": "opensearchcon-north-america-2026",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "slidev --open",
+    "presenter": "slidev --open /presenter",
+    "build": "slidev build",
+    "export": "slidev export --output slides.pdf",
+    "export:pptx": "slidev export --format pptx --output slides.pptx"
+  },
+  "dependencies": {
+    "@slidev/cli": "latest",
+    "@slidev/theme-default": "latest",
+    "vue": "latest"
+  },
+  "devDependencies": {
+    "playwright-chromium": "latest"
+  }
+}

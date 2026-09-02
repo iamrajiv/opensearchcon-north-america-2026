@@ -1,0 +1,10 @@
+2026/09/02 03:06:23 indexed=63000 rate=63000 docs/s requests=208 retried=32500 failed=0
+2026/09/02 03:06:24 indexed=183501 rate=120501 docs/s requests=503 retried=59504 failed=0
+2026/09/02 03:06:25 indexed=327699 rate=144198 docs/s requests=856 retried=89504 failed=0
+2026/09/02 03:06:26 indexed=449205 rate=121506 docs/s requests=1156 retried=118504 failed=0
+2026/09/02 03:06:27 indexed=553207 rate=104002 docs/s requests=1426 retried=146004 failed=0
+2026/09/02 03:06:28 indexed=707448 rate=154241 docs/s requests=1788 retried=173743 failed=0
+2026/09/02 03:06:29 indexed=886948 rate=179500 docs/s requests=2214 retried=207743 failed=0
+2026/09/02 03:06:30 indexed=999500 rate=112552 docs/s requests=2463 retried=225290 failed=0
+2026/09/02 03:06:33 done: indexed=1000000 failed=0 requests=2464 retried=225290 in 8.115s
+2026/09/02 03:06:33 throughput: 123228 docs/s, 29.3 MB/s; events now holds 1000000 documents
