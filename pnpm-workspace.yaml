@@ -1,0 +1,6 @@
+# pnpm settings for this deck.
+# Dependency install scripts are blocked by default; only the PDF exporter's browser download may run.
+onlyBuiltDependencies:
+  - playwright-chromium
+# A newly published version must be at least 3 days old (minutes) before pnpm will install it.
+minimumReleaseAge: 4320

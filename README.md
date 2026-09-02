@@ -22,9 +22,9 @@ copied into `public/fonts` from the `geist` npm package (1.7.2, SIL Open Font
 License) so the deck renders the same offline and on GitHub Pages.
 
 ```bash
-npm install
-npm run dev         # audience view at http://localhost:3030
-npm run presenter   # presenter view with notes at http://localhost:3030/presenter
+pnpm install
+pnpm dev         # audience view at http://localhost:3030
+pnpm presenter   # presenter view with notes at http://localhost:3030/presenter
 ```
 
 Open the presenter view on the laptop screen and the audience view on the
@@ -35,8 +35,8 @@ Export the PDF that Sessionize asks for (Slidev drives the bundled
 `playwright-chromium`):
 
 ```bash
-npm run export        # slides.pdf
-npm run export:pptx   # slides.pptx, speaker notes included
+pnpm export        # slides.pdf
+pnpm export:pptx   # slides.pptx, speaker notes included
 ```
 
 Page metadata (title, favicon, Open Graph and Twitter tags, `og.png`) is declared

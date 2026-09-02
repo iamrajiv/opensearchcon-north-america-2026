@@ -81,7 +81,7 @@ layoutClass: speaker
 
 ::right::
 
-<div class="portrait"><img src="/images/rajiv.png" alt="Rajiv Ranjan Singh" /></div>
+<div class="portrait"><img src="/images/rajiv.webp" alt="Rajiv Ranjan Singh" /></div>
 
 <!--
 A quick word about me. I am Rajiv, a software engineer at A.P. Moller Maersk, the shipping company, in the platform engineering team in Bengaluru. My team builds the internal developer platform that other Maersk engineers deploy on, and I mostly write backend systems in Go.

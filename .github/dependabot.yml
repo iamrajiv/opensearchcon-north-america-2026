@@ -1,0 +1,23 @@
+version: 2
+updates:
+  - package-ecosystem: npm # also covers pnpm-lock.yaml
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3 # let a fresh release sit before it can reach this repo
+    groups:
+      slidev:
+        patterns: ["@slidev/*", "vue"]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
+  - package-ecosystem: gomod
+    directory: /examples/ingestor
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 3
