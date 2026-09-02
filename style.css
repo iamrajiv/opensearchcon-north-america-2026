@@ -14,129 +14,142 @@
   font-display: swap;
 }
 
-/* Monochrome palette. Color appears only for a sourced state (429, blocked) and always with a text cue. */
+/* Tokens copied from the Vercel brand foundation (Geist). Light values on :root,
+   dark values under .dark, which is how Slidev switches themes. Color appears only
+   for a sourced state (429, blocked) and always next to a text cue. */
 :root {
-  --osc-bg: #ffffff;
-  --osc-text: #171717;
-  --osc-text-secondary: #666666;
-  --osc-border-subtle: #eaeaea;
-  --osc-border: #d4d4d4;
-  --osc-border-strong: #171717;
-  --osc-fill-muted: #f5f5f5;
-  --osc-error: #e5484d;
+  --osc-bg: oklch(1 0 0);                       /* background-100 */
+  --osc-bg-secondary: oklch(0.984 0 0);         /* background-200 */
+  --osc-text: oklch(0.205 0 0);                 /* gray-1000 */
+  --osc-text-secondary: oklch(0.42 0 0);        /* gray-900 */
+  --osc-border-subtle: oklch(0 0 0 / 0.1);      /* gray-alpha-300 */
+  --osc-border: oklch(0 0 0 / 0.08);            /* gray-alpha-400 */
+  --osc-border-strong: oklch(0 0 0 / 0.44);     /* gray-alpha-700 */
+  --osc-surface-contrast: oklch(0.205 0 0);
+  --osc-text-on-contrast: oklch(0.946 0 0);
+  --osc-text-on-contrast-secondary: oklch(0.72 0 0);
+  --osc-error: oklch(62.56% 0.2524 23.03);      /* red-700 */
   --osc-weight-regular: 400;
+  --osc-weight-heading: 450;
   --osc-weight-medium: 500;
-  --osc-weight-heading: 600;
+  --osc-radius: 8px;
+  --osc-radius-small: 6px;
 }
 .dark {
-  --osc-bg: #000000;
-  --osc-text: #ededed;
-  --osc-text-secondary: #a1a1a1;
-  --osc-border-subtle: #262626;
-  --osc-border: #333333;
-  --osc-border-strong: #ededed;
-  --osc-fill-muted: #111111;
-  --osc-error: #ff6369;
+  --osc-bg: oklch(0 0 0);
+  --osc-bg-secondary: oklch(0.027 0 0);
+  --osc-text: oklch(0.946 0 0);
+  --osc-text-secondary: oklch(0.706 0 0);
+  --osc-border-subtle: oklch(1 0 0 / 0.13);
+  --osc-border: oklch(1 0 0 / 0.14);
+  --osc-border-strong: oklch(1 0 0 / 0.54);
+  --osc-error: oklch(62.56% 0.2234 23.03);
 }
 
+/* Type roles on the 980px canvas: body 16/24, title 32/40, page title 40/48,
+   compact 14/20, metadata 13/18. Slidev scales the canvas to the screen. */
 .slidev-layout {
   background: var(--osc-bg);
   color: var(--osc-text);
+  font-size: 16px;
+  line-height: 24px;
   font-weight: var(--osc-weight-regular);
-  line-height: 1.5;
   font-feature-settings: 'tnum' 1;
 }
 
 .slidev-layout h1 {
   color: var(--osc-text);
+  font-size: 32px;
+  line-height: 40px;
   font-weight: var(--osc-weight-heading);
-  font-size: 1.85em;
-  line-height: 1.15;
   letter-spacing: -0.02em;
-  margin-bottom: 0.7em;
+  margin: 0 0 24px;
 }
-
-.slidev-layout h1 + p { margin-top: 0; }
 
 .slidev-layout p,
 .slidev-layout li {
-  font-size: 1.02em;
+  font-size: 16px;
+  line-height: 24px;
 }
+.slidev-layout p { margin: 0 0 16px; }
 
 .slidev-layout strong {
   color: var(--osc-text);
   font-weight: var(--osc-weight-medium);
 }
 
-.slidev-layout em { font-style: italic; }
-
-.slidev-layout ul { padding-left: 1.1em; }
-.slidev-layout li { padding-left: 0.2em; }
+.slidev-layout ul { padding-left: 18px; margin: 0 0 16px; }
+.slidev-layout li { padding-left: 4px; }
 .slidev-layout li::marker { color: var(--osc-text-secondary); }
-.slidev-layout li + li { margin-top: 0.4em; }
+.slidev-layout li + li { margin-top: 8px; }
 
 .slidev-layout a {
   color: var(--osc-text);
-  border-bottom: 1px solid var(--osc-border);
+  border-bottom: 1px solid var(--osc-border-strong);
   text-decoration: none;
 }
 
 .slidev-layout code:not(pre code) {
   font-family: 'Geist Mono', ui-monospace, monospace;
-  font-size: 0.9em;
-  background: var(--osc-fill-muted);
+  font-size: 14px;
+  background: var(--osc-bg-secondary);
   border: 1px solid var(--osc-border-subtle);
   border-radius: 4px;
-  padding: 0.05em 0.35em;
+  padding: 1px 6px;
   color: var(--osc-text);
 }
 
 .slidev-layout pre.slidev-code {
   font-family: 'Geist Mono', ui-monospace, monospace;
-  font-size: 0.78em;
-  line-height: 1.45;
+  font-size: 13px;
+  line-height: 18px;
   background: transparent;
   border: 1px solid var(--osc-border-subtle);
-  border-radius: 6px;
-  padding: 0.9em 1.1em;
+  border-radius: var(--osc-radius-small);
+  padding: 14px 16px;
 }
+
+/* Keep de-emphasized code lines legible while a range is highlighted. */
+.slidev-layout .slidev-code .slidev-code-dishonored { opacity: 0.45; }
 
 .slidev-layout .slidev-code-wrapper + p,
-.slidev-layout .slidev-code-wrapper + ul {
-  margin-top: 1em;
-}
+.slidev-layout .slidev-code-wrapper + ul { margin-top: 16px; }
 
 /* Metadata and captions: secondary text, sentence case, never uppercase tracking. */
-.meta {
+.slidev-layout .meta {
   color: var(--osc-text-secondary);
-  font-size: 0.95em;
-  margin: 0.15em 0;
+  font-size: 13px;
+  line-height: 18px;
+  margin: 0 0 8px;
 }
 
-.note {
+.slidev-layout .note {
   color: var(--osc-text-secondary);
-  margin-top: 1em;
+  font-size: 14px;
+  line-height: 20px;
+  margin: 16px 0 0;
   max-width: 62ch;
 }
-.note strong { color: var(--osc-text); }
+.slidev-layout .note strong { color: var(--osc-text); }
 
 /* Tables: evidence, not decoration. Numeric columns and their headers right-align. */
 .slidev-layout table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 1em;
-  font-size: 0.95em;
+  margin: 16px 0 0;
+  font-size: 14px;
+  line-height: 20px;
 }
 .slidev-layout th {
   text-align: left;
   font-weight: var(--osc-weight-medium);
   color: var(--osc-text-secondary);
-  padding: 0.45em 0.6em 0.45em 0;
-  border-bottom: 1px solid var(--osc-border);
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--osc-border-strong);
   vertical-align: bottom;
 }
 .slidev-layout td {
-  padding: 0.5em 0.6em 0.5em 0;
+  padding: 8px 12px 8px 0;
   border-bottom: 1px solid var(--osc-border-subtle);
   vertical-align: baseline;
 }
@@ -144,16 +157,15 @@
 .slidev-layout td.numeric {
   text-align: right;
   font-variant-numeric: tabular-nums;
-  padding-right: 1.4em;
+  padding-right: 24px;
 }
 .slidev-layout tr.lead td { font-weight: var(--osc-weight-medium); }
 
-/* Contrast field for the opening and closing slides. */
+/* Contrast field for the opening and closing slides (surface-contrast, not pure black). */
 .slidev-layout.contrast {
-  --osc-bg: #000000;
-  --osc-text: #ededed;
-  --osc-text-secondary: #a1a1a1;
-  --osc-border: #333333;
+  --osc-bg: var(--osc-surface-contrast);
+  --osc-text: var(--osc-text-on-contrast);
+  --osc-text-secondary: var(--osc-text-on-contrast-secondary);
   background: var(--osc-bg);
   color: var(--osc-text);
   display: flex;
@@ -161,26 +173,28 @@
   justify-content: center;
 }
 .slidev-layout.contrast h1 {
-  color: #ffffff;
-  font-size: 2.5em;
-  line-height: 1.12;
+  font-size: 40px;
+  line-height: 48px;
   max-width: 17em;
-  margin-bottom: 0.6em;
+  margin-bottom: 24px;
 }
-.slidev-layout.contrast .meta { font-size: 1.02em; }
-.slidev-layout.contrast strong { color: #ffffff; }
+.slidev-layout.contrast .meta { font-size: 16px; line-height: 24px; }
+.slidev-layout.contrast .event-logo { width: 220px; height: auto; margin: 0 0 32px; }
+.slidev-layout.contrast .event-logo.closing { width: 160px; margin: 32px 0 0; }
 
-/* Cover and two-column layouts from the built-in theme keep their geometry; only type and color change. */
-.slidev-layout.two-columns { column-gap: 3rem; }
-
-/* Keep de-emphasized code lines legible while a range is highlighted. */
-.slidev-layout .slidev-code .line.dishonored,
-.slidev-layout .slidev-code-dishonored {
-  opacity: 0.45;
+/* Speaker slide: photo column sized to the text, not the screen. */
+.slidev-layout .portrait {
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-top: 8px;
 }
+.slidev-layout .portrait img { width: 200px; height: 200px; }
+
+.slidev-layout.two-columns { column-gap: 48px; }
+.slidev-layout.two-columns.speaker { grid-template-columns: 1fr 240px; }
 
 /* Audience view: no navigation bar on the projector. Keyboard shortcuts still work,
    and the presenter view (.slidev-presenter) keeps its own controls. */
-#page-root nav {
-  display: none !important;
-}
+#page-root nav { display: none !important; }

@@ -39,6 +39,10 @@ npm run export        # slides.pdf
 npm run export:pptx   # slides.pptx, speaker notes included
 ```
 
+Page metadata (title, favicon, Open Graph and Twitter tags, `og.png`) is declared
+in the headmatter of `slides.md`; the plain description tag sits in `index.html`
+because Slidev has no headmatter key for it.
+
 The deck is published to GitHub Pages by
 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) on every push to
 `main`. Enable Pages once in the repository settings with the source set to
@@ -53,4 +57,5 @@ in `runs/` that the slides use. See its
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). The OpenSearchCon North America mark in `public/images` belongs to
+the OpenSearch Software Foundation and comes from the speaker media kit.

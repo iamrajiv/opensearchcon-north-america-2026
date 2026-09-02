@@ -139,7 +139,7 @@ const flowDur = computed(() => (stage.value === 1 ? '3.6s' : '9s'))
 .stage rect { fill: var(--osc-bg); stroke: var(--osc-text); stroke-width: 1.5; transition: stroke 0.3s; }
 .chan rect { fill: var(--osc-bg); stroke: var(--osc-text-secondary); stroke-width: 1.5; stroke-dasharray: 5 4; }
 .worker rect { fill: var(--osc-bg); stroke: var(--osc-text); stroke-width: 1.5; transition: fill 0.3s, stroke 0.3s; }
-.worker.busy rect { fill: var(--osc-fill-muted); }
+.worker.busy rect { fill: var(--osc-bg-secondary); }
 .worker.sleeping rect { stroke: var(--osc-error); stroke-width: 2; }
 .os rect { fill: var(--osc-text); stroke: var(--osc-text); stroke-width: 1.5; transition: fill 0.3s; }
 .os.slow rect { fill: var(--osc-text-secondary); stroke: var(--osc-text-secondary); }

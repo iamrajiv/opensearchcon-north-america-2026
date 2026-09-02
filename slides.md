@@ -2,10 +2,22 @@
 theme: default
 title: Building a High Throughput OpenSearch Ingestor using Go
 titleTemplate: '%s'
-info: |
-  ## Building a High Throughput OpenSearch Ingestor using Go
-  OpenSearchCon North America 2026 · San Jose · Rajiv Ranjan Singh
 author: Rajiv Ranjan Singh
+favicon: /favicon.svg
+htmlAttrs:
+  lang: en
+# Social metadata lives here (Slidev emits it as Open Graph and Twitter tags).
+# The plain <meta name="description"> is in index.html, the one tag Slidev has no key for.
+seoMeta:
+  ogTitle: Building a High Throughput OpenSearch Ingestor using Go
+  ogDescription: Worker pool, bounded channels for backpressure, and per-document retries with a dead-letter file, measured at 150,000 documents a second on one node. OpenSearchCon North America 2026, Rajiv Ranjan Singh.
+  ogImage: https://iamrajiv.github.io/opensearchcon-north-america-2026/og.png
+  ogUrl: https://iamrajiv.github.io/opensearchcon-north-america-2026/
+  twitterCard: summary_large_image
+  twitterSite: '@therajiv'
+  twitterTitle: Building a High Throughput OpenSearch Ingestor using Go
+  twitterDescription: Worker pool, bounded channels for backpressure, and per-document retries with a dead-letter file, measured at 150,000 documents a second on one node.
+  twitterImage: https://iamrajiv.github.io/opensearchcon-north-america-2026/og.png
 lineNumbers: false
 colorSchema: light
 aspectRatio: 16/9
@@ -20,6 +32,8 @@ exportFilename: slides
 layout: cover
 class: contrast
 ---
+
+<img src="/images/opensearchcon-north-america.svg" class="event-logo" alt="OpenSearchCon North America" />
 
 # Building a High Throughput OpenSearch Ingestor using Go
 
@@ -51,9 +65,8 @@ One thing up front: this is a twenty minute slot, so I will not run anything liv
 -->
 
 ---
-layout: image-right
-image: /images/rajiv.png
-backgroundSize: contain
+layout: two-cols
+layoutClass: speaker
 ---
 
 # Rajiv Ranjan Singh
@@ -65,6 +78,10 @@ backgroundSize: contain
 - **GSoC** 2022, **LFX Mentorship** 2021, **GSoD** 2020 & 2021
 - Mentor in **GSoC** 2023 to 2026 with **Jenkins**
 - Previously **Lummo**, **redBus**, and **Economize**
+
+::right::
+
+<div class="portrait"><img src="/images/rajiv.png" alt="Rajiv Ranjan Singh" /></div>
 
 <!--
 A quick word about me. I am Rajiv, a software engineer at A.P. Moller Maersk, the shipping company, in the platform engineering team in Bengaluru. My team builds the internal developer platform that other Maersk engineers deploy on, and I mostly write backend systems in Go.
@@ -467,6 +484,8 @@ class: contrast
 
 <p class="meta"><strong>Rajiv Ranjan Singh</strong> · x.com/therajiv · github.com/iamrajiv</p>
 <p class="meta">github.com/iamrajiv/opensearchcon-north-america-2026</p>
+
+<img src="/images/opensearchcon-north-america.svg" class="event-logo closing" alt="OpenSearchCon North America" />
 
 <!--
 Thank you very much. I am happy to take questions now, and I will be around during lunch if you want to talk about your own ingestion setup.
