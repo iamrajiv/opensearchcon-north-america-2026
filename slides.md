@@ -2,7 +2,6 @@
 theme: default
 title: Building a High Throughput OpenSearch Ingestor using Go
 titleTemplate: '%s'
-author: Rajiv Ranjan Singh
 favicon: /favicon.svg
 htmlAttrs:
   lang: en
