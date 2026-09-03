@@ -1,6 +1,6 @@
 # Building a High Throughput OpenSearch Ingestor using Go
 
-OpenSearchCon North America 2026, San Jose, California, USA, 24th September 2026
+OpenSearchCon North America 2026, 22nd–24th September 2026
 
 - Rajiv Ranjan Singh
 
@@ -12,7 +12,7 @@ architecture. This talk builds an ingestion tool from scratch in Go on the
 channels for backpressure so the cluster is never overloaded, and per-document
 retries with backoff and a dead-letter file so nothing is lost.
 
-Thursday, 24 September 2026, 12:10 to 12:30 PM PDT, San Jose Ballroom Salon III-IV.
+24th September 2026, 12:10 to 12:30 PM PDT, San Jose Ballroom Salon III-IV.
 Track: Operating OpenSearch.
 
 ## Slides
