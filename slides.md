@@ -37,7 +37,7 @@ class: contrast
 # Building a High Throughput OpenSearch Ingestor using Go
 
 <p class="meta"><strong>Rajiv Ranjan Singh</strong> · Software Engineer, A.P. Moller Maersk</p>
-<p class="meta">OpenSearchCon North America 2026 · Operating OpenSearch · San Jose, Thursday, September 24</p>
+<p class="meta">OpenSearchCon North America 2026 · Operating OpenSearch · San Jose, 24th September 2026</p>
 
 <!--
 Hello everyone, and thank you for staying for the last session before lunch. My name is Rajiv, and for the next twenty minutes I want to talk about one very practical problem: getting a large amount of data into OpenSearch quickly, without overloading the cluster, and without losing any of it on the way.
