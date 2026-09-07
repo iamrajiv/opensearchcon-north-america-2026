@@ -48,7 +48,7 @@ The deck is published to GitHub Pages by
 `main`. Enable Pages once in the repository settings with the source set to
 GitHub Actions.
 
-## Demo
+## Examples
 
 [`examples/ingestor`](examples/ingestor) has the ingestor, the naive baseline,
 a `docker-compose.yml` for a single OpenSearch node, and the recorded outputs
