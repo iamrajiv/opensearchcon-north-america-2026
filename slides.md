@@ -9,13 +9,13 @@ htmlAttrs:
 # The plain <meta name="description"> is in index.html, the one tag Slidev has no key for.
 seoMeta:
   ogTitle: Building a High Throughput OpenSearch Ingestor using Go
-  ogDescription: Worker pool, bounded channels for backpressure, and per-document retries with a dead-letter file, measured at 150,000 documents a second on one node. OpenSearchCon North America 2026, Rajiv Ranjan Singh.
+  ogDescription: Worker pool, bounded channels for backpressure, and per-document retries with a dead-letter file. 63 measured runs against OpenSearch 3.8; all 50 on the default retry policy were lossless. OpenSearchCon North America 2026, Rajiv Ranjan Singh.
   ogImage: https://iamrajiv.github.io/opensearchcon-north-america-2026/og.png
   ogUrl: https://iamrajiv.github.io/opensearchcon-north-america-2026/
   twitterCard: summary_large_image
   twitterSite: '@therajiv'
   twitterTitle: Building a High Throughput OpenSearch Ingestor using Go
-  twitterDescription: Worker pool, bounded channels for backpressure, and per-document retries with a dead-letter file, measured at 150,000 documents a second on one node.
+  twitterDescription: Worker pool, bounded channels for backpressure, and per-document retries with a dead-letter file. 63 measured runs against OpenSearch 3.8; all 50 on the default retry policy were lossless.
   twitterImage: https://iamrajiv.github.io/opensearchcon-north-america-2026/og.png
 lineNumbers: false
 colorSchema: light
@@ -96,7 +96,7 @@ Outside work I have been part of Google Summer of Code, LFX Mentorship, and Seas
 
 - **One document per request**: one HTTP round trip per document, a few hundred to a thousand docs per second
 - **A bulk script**: batches into `_bulk`, but sequentially, so the cluster idles while the client encodes and waits
-- **A parallel script**: fast until the write queue fills, then `429 es_rejected_execution_exception`
+- **A parallel script**: fast until the write queue fills, then `429 rejected_execution_exception`
 - **The quiet failure**: HTTP 200 with `errors: true`, and nobody reads the items
 
 </v-clicks>
@@ -104,11 +104,11 @@ Outside work I have been part of Google Summer of Code, LFX Mentorship, and Seas
 <!--
 Let me start with the wall, because everybody hits the same one.
 
-[click] Stage one is the first loader everyone writes: one index request per document. Every document pays a full HTTP round trip, connect, send, wait, so your speed is limited by network latency, not by the cluster. On my laptop, against a cluster on the same machine, that was about four hundred documents a second.
+[click] Stage one is the first loader everyone writes: one index request per document. Every document pays a full HTTP round trip, connect, send, wait, so your speed is limited by network latency, not by the cluster. On my laptop, against a cluster on the same machine, that was about five hundred and sixty documents a second.
 
 [click] Stage two is discovering the bulk API. A bulk request is one HTTP request carrying many documents, say two thousand instead of one. But most scripts still send one bulk request at a time, and while your program encodes the next batch and waits, the cluster sits idle.
 
-[click] Stage three is adding threads without a limit. Fast for a minute, then the cluster answers 429. That status means too many requests, and OpenSearch attaches es_rejected_execution_exception, which in plain words means: the queue of indexing work on the data node is full. That is not a bug. That is the cluster protecting itself from you.
+[click] Stage three is adding threads without a limit. Fast for a minute, then the cluster answers 429. That status means too many requests, and OpenSearch attaches rejected_execution_exception, which in plain words means: the queue of indexing work on the data node is full. Worth knowing, because I had it wrong myself: nearly every blog post calls this es_rejected_execution_exception. That is the Elasticsearch name. OpenSearch dropped the prefix when it forked. Either way it is not a bug. That is the cluster protecting itself from you.
 
 [click] And under all three there is a quiet failure. The bulk API returns HTTP 200 even when half the documents inside failed. The failures are reported inside the response body, one by one. If your code only checks the status code, you have lost data and you do not know it.
 -->
@@ -171,7 +171,7 @@ An HTTP client keeps a pool of open connections so it can reuse them. Go's defau
 
 [click] Then the client itself. In version four you create an opensearchapi client and pass the lower level configuration inside: addresses, optional username and password, and our transport.
 
-[click] Look at RetryOnStatus. It retries the whole request on 502, 503 and 504, all forms of the server being temporarily unavailable. I left 429 out on purpose. During a bulk load a 429 almost never arrives as the status of the whole request. It arrives per document, inside a response whose status is 200. We handle that ourselves, one document at a time.
+[click] Look at RetryOnStatus. It retries the whole request on 502, 503 and 504, all forms of the server being temporarily unavailable. That is also the client's default; I set it explicitly so you can see it. I left 429 out on purpose. During a bulk load a 429 usually does not arrive as the status of the whole request. It arrives per document, inside a response whose status is 200, and we handle that ourselves. Whole request 429s do happen, from shard indexing backpressure, and those come back as an error, which sends the batch round the retry loop anyway.
 -->
 
 ---
@@ -182,18 +182,18 @@ An HTTP client keeps a pool of open connections so it can reuse them. Go's defau
 
 <v-click>
 
-<p class="note">Batch size: OpenSearch's tuning guide says start at <strong>5 to 15 MB</strong> per request and raise it until throughput stops improving.</p>
+<p class="note">Batch size: OpenSearch's tuning guide says start at <strong>5 to 15 MiB</strong> per request and raise it until throughput stops improving.</p>
 
 </v-click>
 
 <!--
 This builds the bulk request body. The bulk API wants newline delimited JSON: for every document, one action line saying what to do, then one line with the document. The action is index, and it carries the document ID.
 
-[click] That is the first important decision: we set our own IDs instead of letting OpenSearch generate them. If a document was indexed but the response got lost on the network, our retry sends it again, and with our own ID the second index simply overwrites the first. That property is called idempotence: doing it twice has the same result as once. If your data has no stable ID, use the create action and treat a 409 conflict as success.
+[click] That is the first important decision: we set our own IDs instead of letting OpenSearch generate them. If a document was indexed but the response got lost on the network, our retry sends it again, and with our own ID the second index simply overwrites the first. That property is called idempotence: doing it twice has the same result as once. If your data has no stable ID, use the create action and treat a 409 conflict as success. That flips one line on a later slide: with index and our own IDs a 409 is a real error, with create it means the document is already there.
 
 [click] A smaller detail: we encode straight into one buffer, no string building. At tens of megabytes of JSON a second, encoding shows up in your CPU profile.
 
-[click] On batch size, OpenSearch's tuning guide says start between five and fifteen megabytes per request and raise it until throughput stops improving. Two thousand of these events is under a megabyte, so there is room. Measure with your documents, not mine.
+[click] On batch size, OpenSearch's tuning guide says start between five and fifteen mebibytes per request. Two thousand of these events is only four hundred kilobytes, so there is room. So I swept it. On this node two thousand documents a request had the best median; five hundred, five thousand and ten thousand were ten to seventeen percent slower, and twenty five thousand was a third slower. The guide is written for bigger documents on bigger nodes. Measure with your documents, not mine.
 -->
 
 ---
@@ -255,7 +255,7 @@ This is a worker's job for one batch, and it is the retry loop. We send the batc
 <v-clicks>
 
 - **429** and **503**: the cluster says *not now*, retry for as long as you can afford to wait
-- **400, 404, 409**: the cluster says *not like that*, straight to the dead-letter file
+- **400, 404, 409**: the cluster says *not like that*, straight to the dead-letter file<br><span class="dim">409 is success instead, if you index with <code>create</code> for de-duplication</span>
 - Whole-request errors retry the entire batch; stable IDs make that safe
 
 </v-clicks>
@@ -280,7 +280,7 @@ And here is the backoff itself. It starts at two hundred milliseconds, doubles o
 
 - `refresh_interval: -1` while loading, back to `1s` when done
 - `number_of_replicas: 0` while loading, back to your normal count when done
-- Bulk request size: start at **5 to 15 MB**, raise until throughput flattens
+- Bulk request size: start at **5 to 15 MiB**, raise until throughput flattens
 - Watch `_cat/thread_pool/write` for `queue` and `rejected`
 
 </v-clicks>
@@ -288,7 +288,7 @@ And here is the backoff itself. It starts at two hundred milliseconds, doubles o
 <!--
 The client is half the story. The other half is not asking the cluster to do unnecessary work while you load. This function creates the index with two settings changed for the duration of the load.
 
-[click] The first is the refresh interval. By default OpenSearch makes new documents searchable once a second, and to do that it writes a new segment file every second and merges them later. During a backfill nobody is searching yet, so that work is wasted. Minus one turns it off. When the load is done you set it back to one second and refresh once.
+[click] The first is the refresh interval. By default OpenSearch makes new documents searchable once a second, cutting a new segment each time. OpenSearch is cleverer here than most people expect: a shard with no search traffic for thirty seconds goes idle and stops refreshing by itself, precisely so it does not waste this during a bulk load. So on a brand new index it buys less than you would think. It earns its place when you backfill an index that is being searched at the same time. Minus one turns refresh off; when the load is done you set it back and refresh once.
 
 [click] The second is replicas. A replica is a copy of a shard on another node. Every document is indexed again on every replica, so with one replica the cluster does the indexing work twice. Set replicas to zero for the load and let the cluster copy the finished shards afterwards. The trade-off is real: lose a node during the load and you reload. For a rerunnable backfill, fine.
 
@@ -299,121 +299,92 @@ The client is half the story. The other half is not asking the cluster to do unn
 
 ---
 
-# Four runs, one laptop
+# The bulk API is 80x. The worker pool is another 3.8x.
 
-**One OpenSearch node, security disabled for the demo:**
+One OpenSearch 3.8 node in Docker (8 CPUs, 2 GiB heap), 1,000,000 synthetic events of 194 bytes on the wire. Warm-up discarded, every configuration run five times.
 
-```bash
-docker compose up -d
-```
-
-<v-click>
-
-**Baseline, one document per request:**
-
-```bash
-go run ./naive -docs 20000
-```
-
-</v-click>
+<table>
+  <thead>
+    <tr><th>Loader</th><th class="numeric">Docs/s</th><th class="numeric">Spread over 5 runs</th><th class="numeric">MB/s</th><th>Time for 1M</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>One document per request</td><td class="numeric">563</td><td class="numeric">560 – 616</td><td class="numeric">0.1</td><td>~30 min (measured on 20k)</td></tr>
+    <tr v-click><td>Bulk, 1 worker, 2000 per request</td><td class="numeric">46,222</td><td class="numeric">41,673 – 47,531</td><td class="numeric">9.0</td><td>21.6 s</td></tr>
+    <tr class="lead" v-click><td>Bulk, 8 workers, 2000 per request</td><td class="numeric">176,112</td><td class="numeric">141,063 – 177,493</td><td class="numeric">34.2</td><td>5.7 s</td></tr>
+    <tr v-click><td>32 workers, write queue shrunk to 2</td><td class="numeric">136,738</td><td class="numeric">94,594 – 151,068</td><td class="numeric">31.8</td><td>7.3 s, 0 dead letters</td></tr>
+  </tbody>
+</table>
 
 <v-click>
 
-**Same bulk code, one worker, then eight:**
-
-```bash
-go run . -docs 1000000 -workers 1
-go run . -docs 1000000 -workers 8 -batch 2000 -queue 4
-```
-
-</v-click>
-
-<v-click>
-
-**Stress test, write queue shrunk to two slots:**
-
-```bash
-WRITE_QUEUE_SIZE=2 docker compose up -d && go run . -docs 1000000 -workers 32 -batch 500
-```
+<p class="note">Median of five runs each, three for the baseline. Across all <strong>50</strong> ingestor runs on the default retry policy, every one ended with <strong>failed=0</strong> and exactly <strong>1,000,000</strong> documents in the index.</p>
 
 </v-click>
 
 <!--
-These are the four runs I did before the talk, all on my laptop, and the next slides show their real output. The compose file starts one OpenSearch node with security disabled, so the demo talks plain HTTP with no credentials. Do not copy that to production.
+So, the numbers. Everything here ran on my laptop before this talk: one OpenSearch node in Docker with eight CPUs, a million synthetic log events, and the compose file and the exact commands are in the repository so you can reproduce it tonight. A laptop is not a measurement instrument, so I throw away a warm-up, run every configuration five times, and show you the median and the full spread. Please read the ratios between these rows, not the absolute numbers.
 
-[click] The naive loader first: twenty thousand documents, one request each, kept small because it takes a while.
+[click] The bulk API on its own, one request at a time: forty six thousand a second. Eighty times the baseline, for one change. This is where most teams stop, and honestly, eighty times is often enough.
 
-[click] Then the same ingestor twice: one worker, which behaves like the sequential bulk script most people have, and eight workers, the pipeline we just walked through. A million events each.
+[click] Eight workers: a hundred and seventy six thousand a second, thirty four megabytes of JSON a second, a million documents in under six seconds. Nearly four times the single worker, not eight times, because the node has eight CPUs and it is the one doing the real work, and on a laptop my program shares those same chips. Nearly four times for one flag is a good deal.
 
-[click] Last, the stress test: the node restarted with its write queue shrunk to two slots, which guarantees 429s, and thirty two workers pointed at it, to watch retried climb while failed stays at zero.
+[click] The stress row: under constant 429s it is slower and less predictable than the healthy run. But what matters is the last column.
+
+[click] And here is the claim I will actually stand behind. The throughput numbers moved around; that is a laptop. Across all fifty ingestor runs on the default retry policy, every one finished with zero failures and exactly one million documents indexed. That is not a performance result, it is a correctness result, and it is the one worth taking home.
 -->
 
 ---
 
-# The eight-worker run, second by second
+# Workers are the throttle; the cluster is the ceiling
 
-<<< @/examples/ingestor/runs/workers-8.log {*|7-8}
+<table>
+  <thead>
+    <tr><th class="numeric">Workers</th><th class="numeric">Docs/s</th><th class="numeric">vs 1 worker</th><th class="numeric">Spread</th><th class="barcell">&nbsp;</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="numeric">1</td><td class="numeric">46,222</td><td class="numeric">1.0x</td><td class="numeric">1.1x</td><td class="barcell"><span class="bar" style="--w:26%"></span></td></tr>
+    <tr><td class="numeric">2</td><td class="numeric">80,447</td><td class="numeric">1.7x</td><td class="numeric">1.1x</td><td class="barcell"><span class="bar" style="--w:46%"></span></td></tr>
+    <tr><td class="numeric">4</td><td class="numeric">127,070</td><td class="numeric">2.7x</td><td class="numeric">1.0x</td><td class="barcell"><span class="bar" style="--w:72%"></span></td></tr>
+    <tr class="lead"><td class="numeric">8</td><td class="numeric">176,112</td><td class="numeric">3.8x</td><td class="numeric">1.3x</td><td class="barcell"><span class="bar lead" style="--w:100%"></span></td></tr>
+    <tr><td class="numeric">16</td><td class="numeric">165,780</td><td class="numeric">3.6x</td><td class="numeric">1.5x</td><td class="barcell"><span class="bar" style="--w:94%"></span></td></tr>
+    <tr><td class="numeric">32</td><td class="numeric">151,544</td><td class="numeric">3.3x</td><td class="numeric">1.2x</td><td class="barcell"><span class="bar" style="--w:86%"></span></td></tr>
+  </tbody>
+</table>
 
-<p class="note">One line per second: documents indexed so far, the rate in that second, bulk requests sent, and the retried and failed counters. The final count comes from the index itself.</p>
+<v-click>
+
+<p class="note">Throughput peaks at <strong>8</strong> workers, and the node has <strong>8</strong> write threads. Past that, extra requests only wait in the write queue: <strong>16</strong> and <strong>32</strong> were no faster than 8. Raise workers until the curve flattens, then stop.</p>
+
+</v-click>
 
 <!--
-This is the real output of the eight worker run. One line per second: documents indexed so far, the rate in that second, bulk requests sent, and the retried and failed counters. The rate settles between one hundred and twenty and one hundred and eighty thousand a second.
+This is the slide I would keep if I had to throw away the rest. Same million documents, same batch size, only the worker count changes.
 
-[click] The summary: one million indexed, zero failed, five hundred and five bulk requests, six point seven seconds. And that final count comes from asking the index itself, not from our counters.
+One, two, four, eight: every doubling buys a lot, from forty six thousand a second to a hundred and seventy six thousand. Not perfectly linear, because on a laptop my program and the cluster share the same chips, but close. Then it stops. Eight is the peak, and eight is not a coincidence: the node has eight CPUs, so it has eight write threads.
+
+[click] Past that, more workers do not help. Sixteen and thirty two were no faster than eight; their medians were a little lower. The node works on roughly eight bulk requests at a time, so the extra requests just wait in its write queue. So raise the worker count until the curve flattens, then stop. A good first guess is the number of write threads across your data nodes, and your cluster will tell you the rest.
 -->
 
 ---
 
 # Under a two-slot write queue, nothing was lost
 
-<<< @/examples/ingestor/runs/stress-429.log {*|9-10}
+<RunLog src="stress-429" />
+
+<p class="note">Write queue of <strong>2</strong>, <strong>32</strong> workers: documents rejected with 429 were re-sent <strong>197,504</strong> times, and <code>_cat/thread_pool/write</code> counted <strong>397</strong> rejected tasks. Every rejected document was retried, the dead-letter file stayed empty, and the index ended with exactly <strong>1,000,000</strong> documents &mdash; on this run and on the four others.</p>
 
 <v-click>
 
-<p class="note">Write queue of <strong>2</strong>, <strong>32</strong> workers: the cluster rejected <strong>1,019</strong> bulk requests with 429. Every rejected document was retried, and the index ended with exactly <strong>1,000,000</strong> documents.</p>
+<p class="note">Same test, five runs each, only the give-up rule changed. A <strong>time window</strong> lost nothing, ever. <strong>5 fixed attempts</strong> dead-lettered up to <strong>1,000</strong> documents. <strong>3 fixed attempts</strong> dead-lettered <strong>4,000 to 7,500</strong>, on every run. A 429 is the cluster asking you to wait, not to give up.</p>
 
 </v-click>
 
 <!--
-And the stress run. Same code, but the write queue has two slots and there are thirty two workers, so the cluster rejects bulk requests constantly. Look at the retried column climb past two hundred thousand, and look at the failed column: zero on every line.
+One last run, and it is the one I care most about. Same code, but the node's write queue is shrunk to two slots and I point thirty two workers at it, so the cluster rejects bulk requests constantly. This is the 429 storm from the first slide, on purpose. Watch the retried column climb to nearly two hundred thousand, and watch the failed column: zero on every line.
 
-[click] The summary again: one million indexed, zero failed, confirmed by the index count. The cluster rejected over a thousand bulk requests, and the run still finished in eight seconds, less than twenty percent slower than the healthy run.
--->
+The summary lands at the end on its own: one million indexed, zero failed, and that zero comes from asking the index how many documents it holds, not from my own counter. Rejected documents were re-sent nearly two hundred thousand times, and every one was eventually accepted. How much this costs you in time moves around a lot between runs, so I am not going to put a number on it. The number that did not move is the one that matters: I ran this five times, and all five ended with exactly one million documents and an empty dead-letter file.
 
----
-
-# Eight workers index 150,000 documents a second
-
-Same laptop, one OpenSearch 3.8 node in Docker (8 CPUs, 2 GB heap), 1,000,000 synthetic events of ~200 bytes.
-
-<table>
-  <thead>
-    <tr><th>Loader</th><th class="numeric">Docs/s</th><th class="numeric">MB/s</th><th>Time for 1M docs</th></tr>
-  </thead>
-  <tbody>
-    <tr><td>One document per request</td><td class="numeric">411</td><td class="numeric">0.1</td><td>~40 min (measured on 20k)</td></tr>
-    <tr v-click><td>Bulk, 1 worker, 2000 per request</td><td class="numeric">42,500</td><td class="numeric">8.3</td><td>23.5 s</td></tr>
-    <tr class="lead" v-click><td>Bulk, 8 workers, 2000 per request</td><td class="numeric">150,000</td><td class="numeric">29.1</td><td>6.7 s</td></tr>
-    <tr v-click><td>32 workers, write queue shrunk to 2</td><td class="numeric">123,000</td><td class="numeric">29.3</td><td>8.1 s, 0 dead letters</td></tr>
-  </tbody>
-</table>
-
-<v-click>
-
-<p class="note">With a fixed <strong>5 attempts</strong> instead of a time window, the same stress run dead-lettered <strong>4,500</strong> documents. A 429 is the cluster asking you to wait, not to give up.</p>
-
-</v-click>
-
-<!--
-The numbers side by side. One laptop, one node in Docker, so read the ratios, not the absolute values. One document per request: four hundred and eleven a second. A million would take forty minutes.
-
-[click] The same bulk code with one worker: forty two thousand a second, a hundred times faster. That is the bulk API alone, where most teams stop.
-
-[click] Eight workers: a hundred and fifty thousand a second, about thirty megabytes of JSON a second, a million documents in under seven seconds. Not eight times faster, because the node has eight CPUs and is doing the real work, but three and a half times for one flag is a good deal.
-
-[click] The stress row: throughput dropped to a hundred and twenty three thousand, the index still holds exactly one million documents, and the dead letter file is empty.
-
-[click] One thing I learned preparing this. My first version gave each document five attempts. Under the same stress test it dead lettered four and a half thousand documents. A time window fixed it. A 429 is the cluster asking you to wait, not to give up.
+[click] And this is the mistake I made, so please take it with you. My first version gave each document five attempts, which is what almost every retry loop does. With a time window, nothing was ever lost. With five fixed attempts, one run in five quietly dropped a thousand documents. With three, every run dropped between four and seven and a half thousand. Same cluster, same code, same data; the only change is how you decide to give up. An attempt count is the wrong unit. A 429 is not an error, it is the cluster asking you to wait, and how long it needs has nothing to do with how many times you have asked.
 -->
 
 ---

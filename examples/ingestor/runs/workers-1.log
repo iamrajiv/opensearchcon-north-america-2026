@@ -1,25 +1,23 @@
-2026/09/02 03:03:39 indexed=30001 rate=30001 docs/s requests=17 retried=0 failed=0
-2026/09/02 03:03:40 indexed=62005 rate=32004 docs/s requests=34 retried=0 failed=0
-2026/09/02 03:03:41 indexed=106005 rate=44000 docs/s requests=56 retried=0 failed=0
-2026/09/02 03:03:42 indexed=156008 rate=50003 docs/s requests=83 retried=0 failed=0
-2026/09/02 03:03:43 indexed=204009 rate=48001 docs/s requests=108 retried=0 failed=0
-2026/09/02 03:03:44 indexed=256010 rate=52001 docs/s requests=135 retried=0 failed=0
-2026/09/02 03:03:45 indexed=302012 rate=46002 docs/s requests=160 retried=0 failed=0
-2026/09/02 03:03:46 indexed=348014 rate=46002 docs/s requests=185 retried=0 failed=0
-2026/09/02 03:03:47 indexed=392015 rate=44001 docs/s requests=208 retried=0 failed=0
-2026/09/02 03:03:48 indexed=432017 rate=40002 docs/s requests=229 retried=0 failed=0
-2026/09/02 03:03:49 indexed=480024 rate=48007 docs/s requests=255 retried=0 failed=0
-2026/09/02 03:03:50 indexed=520025 rate=40001 docs/s requests=276 retried=0 failed=0
-2026/09/02 03:03:51 indexed=564027 rate=44002 docs/s requests=299 retried=0 failed=0
-2026/09/02 03:03:52 indexed=610028 rate=46001 docs/s requests=323 retried=0 failed=0
-2026/09/02 03:03:53 indexed=656032 rate=46004 docs/s requests=348 retried=0 failed=0
-2026/09/02 03:03:54 indexed=700033 rate=44001 docs/s requests=371 retried=0 failed=0
-2026/09/02 03:03:55 indexed=734033 rate=34000 docs/s requests=388 retried=0 failed=0
-2026/09/02 03:03:56 indexed=764035 rate=30002 docs/s requests=404 retried=0 failed=0
-2026/09/02 03:03:57 indexed=798038 rate=34003 docs/s requests=423 retried=0 failed=0
-2026/09/02 03:03:58 indexed=844039 rate=46001 docs/s requests=447 retried=0 failed=0
-2026/09/02 03:03:59 indexed=888042 rate=44003 docs/s requests=470 retried=0 failed=0
-2026/09/02 03:04:00 indexed=930042 rate=42000 docs/s requests=491 retried=0 failed=0
-2026/09/02 03:04:01 indexed=976042 rate=46000 docs/s requests=514 retried=0 failed=0
-2026/09/02 03:04:02 done: indexed=1000000 failed=0 requests=526 retried=0 in 23.51s
-2026/09/02 03:04:02 throughput: 42536 docs/s, 8.3 MB/s; events now holds 1000000 documents
+2026/09/14 18:11:58 indexed=52002 rate=52002 docs/s requests=28 retried=0 failed=0
+2026/09/14 18:11:59 indexed=100006 rate=48004 docs/s requests=53 retried=0 failed=0
+2026/09/14 18:12:00 indexed=150009 rate=50003 docs/s requests=80 retried=0 failed=0
+2026/09/14 18:12:01 indexed=190010 rate=40001 docs/s requests=101 retried=0 failed=0
+2026/09/14 18:12:02 indexed=226012 rate=36002 docs/s requests=120 retried=0 failed=0
+2026/09/14 18:12:03 indexed=256015 rate=30003 docs/s requests=136 retried=0 failed=0
+2026/09/14 18:12:04 indexed=298016 rate=42001 docs/s requests=158 retried=0 failed=0
+2026/09/14 18:12:05 indexed=348017 rate=50001 docs/s requests=184 retried=0 failed=0
+2026/09/14 18:12:06 indexed=396017 rate=48000 docs/s requests=208 retried=0 failed=0
+2026/09/14 18:12:07 indexed=446022 rate=50005 docs/s requests=235 retried=0 failed=0
+2026/09/14 18:12:08 indexed=488022 rate=42000 docs/s requests=256 retried=0 failed=0
+2026/09/14 18:12:09 indexed=534023 rate=46001 docs/s requests=280 retried=0 failed=0
+2026/09/14 18:12:10 indexed=586023 rate=52000 docs/s requests=306 retried=0 failed=0
+2026/09/14 18:12:11 indexed=624023 rate=38000 docs/s requests=325 retried=0 failed=0
+2026/09/14 18:12:12 indexed=670023 rate=46000 docs/s requests=347 retried=0 failed=0
+2026/09/14 18:12:13 indexed=722025 rate=52002 docs/s requests=376 retried=0 failed=0
+2026/09/14 18:12:14 indexed=768026 rate=46001 docs/s requests=400 retried=0 failed=0
+2026/09/14 18:12:15 indexed=820029 rate=52003 docs/s requests=428 retried=0 failed=0
+2026/09/14 18:12:16 indexed=868031 rate=48002 docs/s requests=453 retried=0 failed=0
+2026/09/14 18:12:17 indexed=920033 rate=52002 docs/s requests=480 retried=0 failed=0
+2026/09/14 18:12:18 indexed=966037 rate=46004 docs/s requests=504 retried=0 failed=0
+2026/09/14 18:12:19 done: indexed=1000000 failed=0 requests=521 retried=0 in 21.635s
+2026/09/14 18:12:19 throughput: 46222 docs/s, 9.0 MB/s; events now holds 1000000 documents

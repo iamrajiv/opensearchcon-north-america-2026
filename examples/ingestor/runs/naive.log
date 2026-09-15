@@ -1,5 +1,5 @@
-2026/09/02 03:03:02 indexed=5000 rate=328 docs/s
-2026/09/02 03:03:14 indexed=10000 rate=369 docs/s
-2026/09/02 03:03:25 indexed=15000 rate=399 docs/s
-2026/09/02 03:03:36 indexed=20000 rate=411 docs/s
-2026/09/02 03:03:36 done: indexed=20000 in 48.653s (411 docs/s)
+2026/09/14 18:09:35 indexed=5000 rate=481 docs/s
+2026/09/14 18:09:44 indexed=10000 rate=517 docs/s
+2026/09/14 18:09:52 indexed=15000 rate=544 docs/s
+2026/09/14 18:10:00 indexed=20000 rate=563 docs/s
+2026/09/14 18:10:00 done: indexed=20000 in 35.547s (563 docs/s)

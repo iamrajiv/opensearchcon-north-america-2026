@@ -1,10 +1,9 @@
-2026/09/02 03:06:23 indexed=63000 rate=63000 docs/s requests=208 retried=32500 failed=0
-2026/09/02 03:06:24 indexed=183501 rate=120501 docs/s requests=503 retried=59504 failed=0
-2026/09/02 03:06:25 indexed=327699 rate=144198 docs/s requests=856 retried=89504 failed=0
-2026/09/02 03:06:26 indexed=449205 rate=121506 docs/s requests=1156 retried=118504 failed=0
-2026/09/02 03:06:27 indexed=553207 rate=104002 docs/s requests=1426 retried=146004 failed=0
-2026/09/02 03:06:28 indexed=707448 rate=154241 docs/s requests=1788 retried=173743 failed=0
-2026/09/02 03:06:29 indexed=886948 rate=179500 docs/s requests=2214 retried=207743 failed=0
-2026/09/02 03:06:30 indexed=999500 rate=112552 docs/s requests=2463 retried=225290 failed=0
-2026/09/02 03:06:33 done: indexed=1000000 failed=0 requests=2464 retried=225290 in 8.115s
-2026/09/02 03:06:33 throughput: 123228 docs/s, 29.3 MB/s; events now holds 1000000 documents
+2026/09/14 18:20:09 indexed=54733 rate=54733 docs/s requests=195 retried=32000 failed=0
+2026/09/14 18:20:10 indexed=223733 rate=169000 docs/s requests=581 retried=56500 failed=0
+2026/09/14 18:20:11 indexed=389737 rate=166004 docs/s requests=972 retried=86504 failed=0
+2026/09/14 18:20:12 indexed=508739 rate=119002 docs/s requests=1276 retried=120004 failed=0
+2026/09/14 18:20:13 indexed=678239 rate=169500 docs/s requests=1671 retried=146004 failed=0
+2026/09/14 18:20:14 indexed=821740 rate=143501 docs/s requests=2006 retried=171004 failed=0
+2026/09/14 18:20:15 indexed=976740 rate=155000 docs/s requests=2369 retried=197004 failed=0
+2026/09/14 18:20:17 done: indexed=1000000 failed=0 requests=2403 retried=197504 in 7.313s
+2026/09/14 18:20:17 throughput: 136738 docs/s, 31.8 MB/s; events now holds 1000000 documents

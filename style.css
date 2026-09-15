@@ -132,6 +132,31 @@
 }
 .slidev-layout .note strong { color: var(--osc-text); }
 
+/* A qualifier hung under a bullet: the exception to the line above it. */
+.slidev-layout .dim {
+  color: var(--osc-text-secondary);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/* A magnitude bar beside the number it belongs to. Monochrome: the bar is the
+   shape of the column, not a second colour. Width comes from --w on the span. */
+.slidev-layout td .bar {
+  display: block;
+  width: var(--w);
+  min-width: 2px;
+  height: 8px;
+  border-radius: 0 2px 2px 0;
+  background: var(--osc-text-secondary);
+  opacity: 0.45;
+}
+.slidev-layout td .bar.lead { opacity: 1; }
+
+/* The bar column has no text, so give it an explicit width or the table
+   collapses it to nothing and the shape disappears. */
+.slidev-layout th.barcell,
+.slidev-layout td.barcell { width: 260px; padding-right: 0; }
+
 /* Tables: evidence, not decoration. Numeric columns and their headers right-align. */
 .slidev-layout table {
   width: 100%;
