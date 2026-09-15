@@ -25,7 +25,9 @@ func backoff(attempt int) time.Duration {
 // #endregion backoff
 
 // retryable reports whether a per-item bulk status is worth retrying.
-// 429 is es_rejected_execution_exception: the write thread pool queue is full.
+// 429 is rejected_execution_exception: the write thread pool queue is full.
+// (Elasticsearch calls it es_rejected_execution_exception; OpenSearch dropped
+// the prefix when it forked, so that is the name you see on an OpenSearch cluster.)
 // 503 is a node that is temporarily unavailable. Everything else (400 mapping
 // errors, 404 missing index) will fail again, so it goes to the dead-letter file.
 // #region retryable

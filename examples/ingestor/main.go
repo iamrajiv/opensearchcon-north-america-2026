@@ -23,6 +23,7 @@ func main() {
 	queue := flag.Int("queue", 4, "batches buffered ahead of the workers")
 	shards := flag.Int("shards", 1, "primary shards for the index")
 	retryFor := flag.Duration("retry-for", 2*time.Minute, "keep retrying rejected documents this long before dead-lettering")
+	maxTries := flag.Int("max-attempts", 0, "give up after this many attempts instead of using the -retry-for window")
 	dlq := flag.String("dead-letter", "dead-letter.ndjson", "where rejected documents are written")
 	flag.Parse()
 
@@ -42,7 +43,7 @@ func main() {
 	}
 	defer dl.Close()
 
-	in := &Ingestor{client: client, index: *index, retryFor: *retryFor, stats: &Stats{}, deadLetter: dl}
+	in := &Ingestor{client: client, index: *index, retryFor: *retryFor, maxTries: *maxTries, stats: &Stats{}, deadLetter: dl}
 
 	// #region pipeline
 	// The pipeline: generate -> events -> batcher -> batches -> workers -> _bulk
