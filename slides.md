@@ -457,6 +457,11 @@ class: contrast
 
 <img src="/images/opensearchcon-north-america.svg" class="event-logo closing" alt="OpenSearchCon North America" />
 
+<figure class="feedback">
+  <img src="/images/feedback-qr.png" alt="QR code to rate this session on Sessionize" />
+  <figcaption>Rate this session</figcaption>
+</figure>
+
 <!--
-Thank you very much. I am happy to take questions now, and I will be around during lunch if you want to talk about your own ingestion setup.
+Thank you very much. If you have a moment, the QR code on the right takes you to the session feedback form, and it genuinely helps. I am happy to take questions now, and I will be around during lunch if you want to talk about your own ingestion setup.
 -->
