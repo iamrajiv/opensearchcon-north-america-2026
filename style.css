@@ -205,6 +205,11 @@
   margin-bottom: 24px;
 }
 .slidev-layout.contrast .meta { font-size: 16px; line-height: 24px; }
+/* Contact lines on the closing slide: full-strength text so the back of the room can read them. */
+.slidev-layout.contrast .meta.contact { color: var(--osc-text-on-contrast); margin: 0 0 4px; }
+.slidev-layout.contrast .meta.contact.name { margin-bottom: 16px; }
+/* The default theme fades the paragraph right after a heading (h1 + p) to 50%; the name line must not fade. */
+.slidev-layout.contrast h1 + p.contact { opacity: 1; }
 .slidev-layout.contrast .event-logo { width: 220px; height: auto; margin: 0 0 32px; }
 .slidev-layout.contrast .event-logo.closing { width: 160px; margin: 32px 0 0; }
 
@@ -232,13 +237,14 @@
   line-height: 20px;
 }
 
-/* Speaker slide: photo column sized to the text, not the screen. */
+/* Speaker slide: photo column sized to the text, not the screen. The photo starts level with
+   the body under the heading (h1 40px line + 24px margin), not with the heading itself. */
 .slidev-layout .portrait {
   height: 100%;
   display: flex;
   align-items: flex-start;
   justify-content: flex-end;
-  padding-top: 8px;
+  padding-top: 68px;
 }
 .slidev-layout .portrait img { width: 200px; height: 200px; }
 
