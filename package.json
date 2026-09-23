@@ -15,7 +15,7 @@
     "vue": "latest"
   },
   "devDependencies": {
-    "hono": "^4.13.5",
+    "hono": "^4.13.8",
     "playwright-chromium": "latest"
   },
   "packageManager": "pnpm@10.29.3",
