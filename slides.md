@@ -81,7 +81,7 @@ layoutClass: speaker
 <div class="portrait"><img src="/images/rajiv.webp" alt="Rajiv Ranjan Singh" /></div>
 
 <!--
-A quick word about me. I'm a software engineer at A.P. Moller Maersk, the shipping company, in the platform engineering team in Bengaluru. I mostly write backend systems in Go. I've also been part of Google Summer of Code for a few years, and now I mentor there with Jenkins.
+A quick word about me. I'm a software engineer at A.P. Moller Maersk, the shipping and logistics company, in the platform engineering org in Bengaluru. I mostly write backend systems in Go. I've also been part of Google Summer of Code for a few years, and now I mentor there with Jenkins.
 -->
 
 ---

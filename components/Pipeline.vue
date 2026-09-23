@@ -11,7 +11,7 @@ const stage = computed(() => Math.min(4, Math.max(0, $clicks.value)))
 // Geometry. Every connector starts on the right edge of one box and ends
 // on the left edge of the next, so nothing floats or overshoots.
 const laneY = 155
-const workers = [0, 1, 2, 3].map(i => ({ i, y: 40 + i * 58, cy: 60 + i * 58 }))
+const workers = Array.from({ length: 8 }, (_, i) => ({ i, y: 34 + i * 28, cy: 45 + i * 28 }))
 const inBus = 775
 const outBus = 925
 
@@ -55,10 +55,10 @@ const flowDur = computed(() => (stage.value === 1 ? '3.6s' : '9s'))
     <line x1="750" :y1="laneY" :x2="inBus" :y2="laneY" class="lane" />
 
     <!-- fan-in bus to the workers, fan-out bus to OpenSearch -->
-    <line :x1="inBus" :y1="workers[0].cy" :x2="inBus" :y2="workers[3].cy" class="lane" />
+    <line :x1="inBus" :y1="workers[0].cy" :x2="inBus" :y2="workers[workers.length - 1].cy" class="lane" />
     <line v-for="w in workers" :key="'in' + w.i" :x1="inBus" :y1="w.cy" x2="800" :y2="w.cy" class="lane thin" marker-end="url(#pl-head)" />
     <line v-for="w in workers" :key="'out' + w.i" x1="900" :y1="w.cy" :x2="outBus" :y2="w.cy" class="lane thin" />
-    <line :x1="outBus" :y1="workers[0].cy" :x2="outBus" :y2="workers[3].cy" class="lane" />
+    <line :x1="outBus" :y1="workers[0].cy" :x2="outBus" :y2="workers[workers.length - 1].cy" class="lane" />
     <line :x1="outBus" :y1="laneY" x2="960" :y2="laneY" class="lane" marker-end="url(#pl-head)" />
 
     <!-- generate -->
@@ -100,12 +100,12 @@ const flowDur = computed(() => (stage.value === 1 ? '3.6s' : '9s'))
     <!-- workers -->
     <g class="workers">
       <g v-for="w in workers" :key="w.i" class="worker" :class="{ busy: stage >= 2, sleeping: stage >= 4 && w.i === 1 }">
-        <rect x="800" :y="w.y" width="100" height="40" rx="6" />
-        <text x="850" :y="w.cy + 5" class="label small">worker {{ w.i + 1 }}</text>
+        <rect x="800" :y="w.y" width="100" height="22" rx="4" />
+        <text x="850" :y="w.cy + 4" class="label worker-label">worker {{ w.i + 1 }}</text>
       </g>
-      <text x="850" y="292" class="sub">N workers, one request in flight each</text>
-      <text v-if="stage >= 2" x="850" y="312" class="state">all waiting on responses</text>
-      <text v-if="stage >= 4" x="850" y="24" class="state">429 on worker 2: sleep 0.4 s, resend only what was rejected</text>
+      <text x="850" y="284" class="sub">8 workers, one request in flight each</text>
+      <text v-if="stage >= 2" x="850" y="304" class="state">all waiting on responses</text>
+      <text v-if="stage >= 4" x="850" y="20" class="state">429 on worker 2: sleep 0.4 s, resend only what was rejected</text>
     </g>
 
     <!-- OpenSearch -->
@@ -147,6 +147,7 @@ const flowDur = computed(() => (stage.value === 1 ? '3.6s' : '9s'))
 .fill rect { fill: var(--osc-text-secondary); }
 .label { font-size: 20px; font-weight: 500; fill: var(--osc-text); text-anchor: middle; }
 .label.small { font-size: 16px; }
+.label.worker-label { font-size: 12px; font-weight: 400; }
 .sub { font-size: 13px; fill: var(--osc-text-secondary); text-anchor: middle; }
 .on-dark { fill: var(--osc-bg); }
 .sub.on-dark { fill: var(--osc-bg); opacity: 0.8; }
