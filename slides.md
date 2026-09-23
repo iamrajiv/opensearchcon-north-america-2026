@@ -100,13 +100,15 @@ A quick word about me. I'm a software engineer at A.P. Moller Maersk, the shippi
 <!--
 Most of us start the same way, and we hit the same walls.
 
-[click] Wall one: one request per document. Every document waits for its own trip over the network. On my laptop that was about five hundred and sixty documents a second. A million documents would take half an hour.
+[click] Wall one: one request per document. Every document waits for its own trip over the network. On my laptop that was about 560 documents a second. A million documents would take half an hour.
 
 [click] Wall two: you find the bulk API, which sends many documents in one request. Much better. But the script sends one bulk request at a time, so the cluster sits idle while it waits.
 
 [click] Wall three: you add threads with no limit. It's fast for a minute, then the cluster answers 429, too many requests. That's not a bug. The cluster's queue is full, and it's asking you to slow down.
 
 [click] And under all three, there's a quiet failure. The bulk API can answer 200 OK even when some documents inside were rejected. If you only check the status code, you lose data and never know.
+
+These four walls are the three problems the rest of the talk solves: go fast, don't overload the cluster, and don't lose a document.
 -->
 
 ---
@@ -143,11 +145,11 @@ clicks: 4
 <Pipeline />
 
 <!--
-This is the whole design, left to right. A generator produces documents; in real life that's your files, Kafka, or a database. A batcher groups them into batches of two thousand. Then N workers take the batches and send them to OpenSearch.
+This is the whole design, left to right. A generator produces documents; in real life that's your files, Kafka, or a database. A batcher groups them into batches of 2,000. Then 8 workers take the batches and send them to OpenSearch.
 
 If you don't write Go, don't worry. This is just a bounded queue and a fixed pool of workers, and it works the same way in Java or Python.
 
-[click] Each worker sends one request at a time. So N workers means at most N requests in flight. N is your throttle.
+[click] Each worker sends one request at a time. So 8 workers means at most 8 requests being handled at once. That number is your throttle.
 
 [click] Now the cluster slows down. The workers wait for responses, nobody takes new batches, and the queue in front of them fills up.
 
@@ -163,9 +165,11 @@ If you don't write Go, don't worry. This is just a bounded queue and a fixed poo
 <<< @/examples/ingestor/client.go#client {2-4|6-11|13-14}
 
 <!--
+PACE: about 5 minutes in.
+
 Now the code, starting with the client. There's a hidden trap in the first lines.
 
-Go's HTTP client keeps only two idle connections per server by default. With eight workers, six of them would open a new connection on every request. So I raise the limit to one connection per worker.
+Go's HTTP client keeps only 2 idle connections per server by default. With 8 workers, 6 of them would open a new connection on every request. So I raise the limit to one connection per worker.
 
 [click] Then we create the OpenSearch client with that connection setup.
 
@@ -189,9 +193,9 @@ This builds the bulk request. The format is simple: for each document, one line 
 
 [click] Here's the important decision: we set our own document IDs. Imagine a request succeeds, but the response gets lost on the network. We retry. With our own ID, the retry just overwrites the same document. No duplicates. Doing it twice gives the same result as doing it once.
 
-[click] A small detail: we write everything straight into one buffer. At high volume, that saves real CPU.
+[click] A small detail: we build the request in one buffer instead of joining strings. When you send tens of megabytes a second, that saves real CPU.
 
-[click] How big should a batch be? OpenSearch's guide says start at five to fifteen megabytes. I measured on my setup, and two thousand documents per request worked best. Very large batches of twenty-five thousand were a third slower. Measure with your own data.
+[click] How big should a batch be? OpenSearch's guide says start at 5 to 15 MB. I measured on my setup, and 2,000 documents per request worked best. Very large batches of 25,000 were a third slower. Measure with your own data.
 -->
 
 ---
@@ -201,9 +205,9 @@ This builds the bulk request. The format is simple: for each document, one line 
 <<< @/examples/ingestor/pool.go#workers {*|3-4|5-7|10}
 
 <!--
-This is the worker pool. All of it, eleven lines.
+This is the worker pool. All of it, 11 lines.
 
-[click] We start N goroutines.
+[click] We start 8 goroutines (one per worker).
 
 [click] Each one loops over the batches channel. It takes the next batch, or waits if there isn't one. No locks needed: the channel is the queue.
 
@@ -223,7 +227,7 @@ First, the request itself fails, like a timeout or a dropped connection. We retu
 
 [click] Second, the response says errors is false. Every document was saved. Nothing more to do.
 
-[click] Third, errors is true. Now we check each item. Items come back in the same order we sent them, so item number i is our document number i.
+[click] Third, errors is true. Now we check each item. The results come back in the same order we sent the documents: the first result is for our first document, and so on.
 
 [click] Every failed document goes into a list with its status and its reason. 429 means the cluster was busy, so it's worth retrying. 400 means the document itself is bad, so retrying won't help. And note: the Go client does not turn these failures into an error. You have to look.
 -->
@@ -235,9 +239,9 @@ First, the request itself fails, like a timeout or a dropped connection. We retu
 <<< @/examples/ingestor/ingest.go#retry {3-4,9|10-16|18-21}
 
 <!--
-This is the retry loop for one batch. We send it, and whatever comes back rejected becomes the new batch. Two thousand go out, thirty are rejected, and only those thirty go out again.
+This is the retry loop for one batch. We send it, and whatever comes back rejected becomes the new batch. 2,000 go out, 30 are rejected, and only those 30 go out again.
 
-[click] Each rejected document goes one of two ways. If it's worth retrying, and we're still inside the retry window of two minutes, it stays for another round. Otherwise it goes to the dead-letter file: a plain file with the document and the reason. Nothing is silently dropped.
+[click] Each rejected document goes one of two ways. If it's worth retrying, and we're still inside the retry window of 2 minutes, it stays for another round. Otherwise it goes to the dead-letter file: a plain file with the document and the reason. Nothing is silently dropped.
 
 [click] Before the next round, the worker sleeps a little, a bit longer each time, plus some randomness. And a sleeping worker isn't taking new batches, so this also slows the whole pipeline down.
 -->
@@ -259,7 +263,7 @@ This is the retry loop for one batch. We send it, and whatever comes back reject
 </v-clicks>
 
 <!--
-Here's the wait between retries. It starts at two hundred milliseconds, doubles each time, and never goes above ten seconds. The random part is called jitter. It stops all the workers from retrying at the same moment.
+Here's the wait between retries. It starts at 200 ms, doubles each time, and never goes above 10 seconds. The random part is called jitter. It stops all the workers from retrying at the same moment.
 
 [click] 429 and 503 mean "not right now". Retry them.
 
@@ -290,7 +294,7 @@ The client is only half the job. The other half is not giving the cluster extra 
 
 [click] A replica is a copy of the data on another machine, and every copy means indexing each document again. So we set replicas to zero during the load and add them back afterwards. The risk: if a machine dies mid-load, you run the load again.
 
-[click] Keep bulk requests a sensible size: start around five to fifteen megabytes, and measure.
+[click] Keep bulk requests a sensible size: start around 5 to 15 MB, and measure.
 
 [click] And while it runs, watch the write thread pool. The queue and the rejected count tell you if you're pushing too hard.
 -->
@@ -320,15 +324,17 @@ One OpenSearch 3.8 node in Docker (8 CPUs, 2 GiB heap), 1,000,000 synthetic even
 </v-click>
 
 <!--
-Now the numbers. Everything ran on my laptop: one OpenSearch node in Docker, and a million small log events. I ran every setup five times and show the middle result and the range. So please read the ratios, not the exact numbers.
+PACE: about 11 minutes in.
 
-[click] Just switching to the bulk API, with one worker: forty-six thousand documents a second. Eighty times faster, from one change.
+Now the numbers. Everything ran on my laptop: one OpenSearch node in Docker, and a million small log events. I ran every setup 5 times and show the middle result and the range. So please read the ratios, not the exact numbers.
 
-[click] Eight workers: a hundred and seventy-six thousand a second. A million documents in under six seconds. Nearly four times the single worker.
+[click] Just switching to the bulk API, with one worker: 46,222 documents a second. 80 times faster, from one change.
+
+[click] 8 workers: 176,112 a second. A million documents in under 6 seconds. Nearly 4 times the single worker.
 
 [click] The last row is a stress test, with the cluster overloaded on purpose. It's slower, but look at the last column: zero documents lost.
 
-[click] And this is the result that matters most. In all fifty runs, every single one ended with zero failures and exactly one million documents in the index.
+[click] And this is the result that matters most. In all 50 runs, every single one ended with 0 failures and exactly 1,000,000 documents in the index.
 -->
 
 ---
@@ -358,9 +364,9 @@ Now the numbers. Everything ran on my laptop: one OpenSearch node in Docker, and
 <!--
 This slide answers one question: how many workers should I use? Same data, only the worker count changes.
 
-One, two, four, eight: each step adds a lot, from forty-six thousand to a hundred and seventy-six thousand a second. Eight is the peak, and that's not a coincidence. The node has eight CPUs, so it has eight indexing threads.
+1, 2, 4, 8 workers: each step adds a lot, from 46,222 to 176,112 a second. 8 is the peak, and that's not a coincidence. The node has 8 CPUs, so it has 8 indexing threads.
 
-[click] After eight, more workers don't help. Sixteen and thirty-two were no faster, because the extra requests just wait in the cluster's queue. So add workers until the numbers stop going up, then stop. A good starting point is the number of indexing threads in your cluster.
+[click] After 8, more workers don't help. 16 and 32 were no faster, because the extra requests just wait in the cluster's queue. So add workers until the numbers stop going up, then stop. A good starting point is the number of indexing threads in your cluster.
 -->
 
 ---
@@ -378,11 +384,11 @@ One, two, four, eight: each step adds a lot, from forty-six thousand to a hundre
 </v-click>
 
 <!--
-The last test is the hardest one. I shrank the cluster's write queue to just two slots and pointed thirty-two workers at it, so the cluster answers 429 all the time.
+The last test is the hardest one. I shrank the cluster's write queue to just 2 slots and pointed 32 workers at it, so the cluster answers 429 all the time.
 
-Watch the retried count climb, and watch failed: zero on every line. At the end, one million documents, counted from the index itself. I ran this five times, and all five ended the same way.
+Watch the retried count climb, and watch failed: 0 on every line. At the end, 1,000,000 documents, counted from the index itself. I ran this 5 times, and all 5 ended the same way.
 
-[click] Now the mistake I made first. My first version gave each document a fixed number of attempts, like most retry code does. With five attempts, one run lost a thousand documents. With three, every run lost thousands. With a time window, nothing was ever lost. A 429 means "wait", not "give up".
+[click] Now the mistake I made first. My first version gave each document a fixed number of attempts, like most retry code does. With 5 attempts, one run lost 1,000 documents. With 3, every run lost thousands. With a time window, nothing was ever lost. A 429 means "wait", not "give up".
 -->
 
 ---
@@ -402,6 +408,8 @@ Watch the retried count climb, and watch failed: zero on every line. At the end,
 </v-clicks>
 
 <!--
+PACE: about 14 minutes in.
+
 To wrap up.
 
 [click] Use bulk requests, sent in parallel by a fixed number of workers.
