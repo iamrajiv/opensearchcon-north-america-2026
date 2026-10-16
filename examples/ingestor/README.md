@@ -115,3 +115,51 @@ The give-up rule, under the same two-slot write queue (five runs each): the
 two-minute retry window dead-lettered nothing on any run; `-max-attempts 5`
 dead-lettered 1,000 documents on one run in five; `-max-attempts 3` dead-lettered
 4,000 to 7,500 on every run.
+
+## Update: opensearch-go v5
+
+This code was written against **opensearch-go v4.7.3**, the version used in the talk.
+Two things changed in the client after it, and one thing did not.
+
+**v4.7.0** added typed partial-failure errors (`PartialBulkError`, `PartialSearchError`,
+`ShardFailureError`), but masked them off by default, so a rejected document still
+produced no Go error. You can opt in on v4:
+
+```go
+client, _ := opensearchapi.NewClient(opensearchapi.Config{
+    Client: opensearch.Config{Addresses: []string{addr}},
+    Errors: new(errmask.Empty), // or: OPENSEARCH_GO_ERROR_MASK=empty
+})
+```
+
+**v5.0.0** (22 September 2026) makes that the default. `Bulk` returns a
+`*PartialBulkError` carrying `FailedItems []BulkRespItem` (each with its own `Status`
+and `Error`) and `SucceededCount`, so the client finds the rejected documents for you:
+
+```go
+// v4.7.3, as in this repo: check the flag, walk every item yourself
+resp, err := client.Bulk(ctx, opensearchapi.BulkReq{Index: index, Body: body})
+if err != nil { return err }          // only "the request did not arrive"
+if !resp.Errors { return nil }
+for i, item := range resp.Items { /* item["index"].Status, batch[i] */ }
+
+// v5: the rejected items arrive with the error
+resp, err := client.Bulk(ctx, opensearchapi.BulkReq{Index: index, Body: body})
+for _, sub := range opensearchapi.Errors(err) {
+    if e, ok := sub.(*opensearchapi.PartialBulkError); ok {
+        for _, item := range e.FailedItems { /* item.Status, item.Error */ }
+    }
+}
+```
+
+**What did not change**, and is still this repo's job:
+
+- the client does not retry `429` for you (`RetryOnStatus` defaults to 502, 503, 504);
+- `opensearchutil.BulkIndexer` still calls `OnFailure` with a **nil** error for
+  per-document rejections, so the "HTTP 200 is not success" trap is still easy to hit;
+- deciding *which* failures are worth retrying, *how long* to keep trying (this repo
+  uses a 2-minute window rather than a fixed attempt count), and *where* the give-ups
+  go (`dead-letter.ndjson`) is policy the client does not provide.
+
+So v5 improves **detection**. The retry, backoff, give-up rule and dead-letter file in
+`ingest.go`, `retry.go` and `deadletter.go` stay exactly as the talk describes them.

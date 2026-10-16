@@ -3,3 +3,5 @@
 OpenSearchCon North America 2026, San Jose, USA, 22nd–24th September 2026
 
 - Rajiv Ranjan Singh
+
+[Talk recording](https://www.youtube.com/watch?v=gYamMwE_Zwk)
